@@ -1,0 +1,47 @@
+# docker-compose up --build
+# docker-compose -p fullstack-assignment -f docker-compose.yml up -d --build
+
+version: '3.9'
+
+services:
+  mongo-fs:
+    image: mongo:latest
+    container_name: mongo-fs
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongo/db-data:/data/db
+    networks:
+      - fullstack
+
+  backend:
+    build: ./backend
+    container_name: backend
+    environment:
+      - MONGODB_URI=mongodb://mongo-fs:27017/fullstack
+    ports:
+      - 5000:5000
+    depends_on:
+      - mongo-fs
+    networks:
+      - fullstack
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - 3000:3000
+    depends_on:
+      - backend
+    networks:
+      - fullstack
+
+volumes:
+  mongo-db:
+    driver: local
+  mongo_data:
+
+networks:
+  fullstack:
+    driver: bridge
